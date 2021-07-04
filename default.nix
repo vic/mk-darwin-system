@@ -1,7 +1,7 @@
 { nixpkgs, ... }@args:
 (nixpkgs.lib.fix (mkDarwinSystem:
   { hostName, system, nixpkgs, nix-darwin, flake-utils, home-manager
-  , nixosModules ? [ ], ... }@args:
+  , nixosModules ? [ ], flakeOutputs ? nixpkgs.lib.id, ... }@args:
   let
     darwinConfig = import "${nix-darwin}/eval-config.nix" {
       inherit (nixpkgs) lib;
@@ -21,8 +21,8 @@
 
     nixpkgsOverlay = (new: old: {
       darwinConfigurations.${hostName}.system = defaultPackage;
-      devEnv = new.buildEnv {
-        name = "devEnv";
+      sysEnv = new.buildEnv {
+        name = "sysEnv";
         paths = nixosConfiguration.config.environment.systemPackages;
       };
     });
@@ -39,14 +39,19 @@
       };
     };
 
-    pkgs = nixosConfiguration.pkgs;
     defaultPackage = nixosConfiguration.system;
-    devShell = pkgs.mkShell { buildInputs = [ pkgs.devEnv ]; };
+    devShell = nixosConfiguration.pkgs.mkShell {
+      packages = [ nixosConfiguration.pkgs.sysEnv ];
+    };
     defaultApp = flake-utils.lib.mkApp {
-      drv = pkgs.writeScriptBin "system-switch"
+      drv = nixosConfiguration.pkgs.writeScriptBin "system-switch"
         "exec ${defaultPackage}/sw/bin/darwin-rebuild switch --flake";
     };
-  in {
-    inherit defaultApp defaultPackage devShell pkgs;
-    nixosConfigurations.${hostName} = nixosConfiguration;
-  })) args
+
+    outputs = {
+      inherit defaultApp defaultPackage devShell;
+      pkgs = nixosConfiguration.pkgs;
+      nixosConfigurations.${hostName} = nixosConfiguration;
+    };
+
+  in flakeOutputs outputs)) args
