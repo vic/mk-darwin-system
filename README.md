@@ -39,6 +39,24 @@ git+file:///hk/mk-darwin-system?dir=examples%2fminimal
 └───pkgs: unknown
 ```
 
+### Options
+
+The provided `mkDarwinSystem` can take the following options:
+
+```nix
+mkDarwinSystem {
+  system   = "aarch64-darwin";
+  hostName = "example";            # hostName used to bind darwinConfigurations.${system}.${hostName}
+  nixosModules = [];               # a list of modules further customize your darwin system.
+  silliconOverlay =                # a function for selecting intelPkgs for packages not available yet in M1, eg:
+    (silliconPkgs: intelPkgs: {}); # (silliconPkgs: intelPkgs: { inherit (intelPkgs) haskell haskellPackages; })
+  flakeOutputs =                   # a function to customize what's exported from your system flake.
+    ({
+      defaultApp, defaultPackage, devShell, pkgs, nixosConfigurations.${hostName}
+    }@outputs = outputs)
+}
+```
+
 ### Examples
 ##### [minimal](examples/minimal)
 ###### [vix - Vic's Nix Environment](http://github.com/vic/vix)

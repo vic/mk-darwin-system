@@ -1,14 +1,17 @@
 { nixpkgs, ... }@args:
 (nixpkgs.lib.fix (mkDarwinSystem:
   { hostName, system, nixpkgs, nix-darwin, flake-utils, home-manager
-  , nixosModules ? [ ], flakeOutputs ? nixpkgs.lib.id, ... }@args:
+  , nixosModules ? [ ]
+  , flakeOutputs ? nixpkgs.lib.id
+  , silliconOverlay ? (silliconPkgs: intelPkgs: {})
+  , ... }@args:
   let
     darwinConfig = import "${nix-darwin}/eval-config.nix" {
       inherit (nixpkgs) lib;
       inherit system;
     };
 
-    silliconBackportOverlay = (new: old:
+    silliconBackportOverlay = silliconPkgs: new: old:
       let
         sillicon = "aarch64-darwin";
         intel = "x86_64-darwin";
@@ -16,8 +19,8 @@
       in if system == sillicon then {
         # TODO: Remove when PR gets merged. https://github.com/NixOS/nixpkgs/pull/126195
         inherit (intelSystem.pkgs) haskell haskellPackages;
-      } else
-        { });
+        inherit (silliconOverlay silliconPkgs intelSystem.pkgs);
+      } else { };
 
     nixpkgsOverlay = (new: old: {
       darwinConfigurations.${hostName}.system = defaultPackage;
@@ -31,7 +34,7 @@
       modules = [
         nix-darwin.darwinModules.flakeOverrides
         home-manager.darwinModules.home-manager
-        { nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ]; }
+        ({pkgs, ...}: { nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay pkgs ]; })
       ] ++ nixosModules;
       inputs = {
         inherit nixpkgs;
