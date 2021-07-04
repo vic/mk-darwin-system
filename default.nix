@@ -1,7 +1,7 @@
-{ nixpkgs, ...} @args:
-  (nixpkgs.lib.fix (mkDarwinSystem:
+{ nixpkgs, ... }@args:
+(nixpkgs.lib.fix (mkDarwinSystem:
   { hostName, system, nixpkgs, nix-darwin, flake-utils, home-manager
-    , nixosModules ? [ ], ... }@args:
+  , nixosModules ? [ ], ... }@args:
   let
     darwinConfig = import "${nix-darwin}/eval-config.nix" {
       inherit (nixpkgs) lib;
@@ -13,19 +13,25 @@
         sillicon = "aarch64-darwin";
         intel = "x86_64-darwin";
         intelSystem = mkDarwinSystem (args // { system = intel; });
-      in if system == sillicon then
-        {
-          # TODO: Remove when PR gets merged. https://github.com/NixOS/nixpkgs/pull/126195
-          inherit (intelSystem.pkgs) haskell haskellPackages;
-        }
-      else
+      in if system == sillicon then {
+        # TODO: Remove when PR gets merged. https://github.com/NixOS/nixpkgs/pull/126195
+        inherit (intelSystem.pkgs) haskell haskellPackages;
+      } else
         { });
+
+    nixpkgsOverlay = (new: old: {
+      darwinConfigurations.${hostName}.system = defaultPackage;
+      devEnv = new.buildEnv {
+        name = "devEnv";
+        paths = nixosConfiguration.config.environment.systemPackages;
+      };
+    });
 
     nixosConfiguration = darwinConfig {
       modules = nixosModules ++ [
         nix-darwin.darwinModules.flakeOverrides
         home-manager.darwinModules.home-manager
-        { nixpkgs.overlays = [ silliconBackportOverlay ]; }
+        { nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ]; }
       ];
       inputs = {
         inherit nixpkgs;
@@ -33,16 +39,9 @@
       };
     };
 
-    pkgs = nixosConfiguration.pkgs // {
-      darwinConfigurations.${hostName}.system = defaultPackage;
-      sysEnv = nixosConfiguration.pkgs.buildEnv {
-        name = "sysEnv";
-        paths = nixosConfiguration.config.environment.systemPackages;
-      };
-    };
-
+    pkgs = nixosConfiguration.pkgs;
     defaultPackage = nixosConfiguration.system;
-    devShell = pkgs.mkShell { buildInputs = [ pkgs.sysEnv ]; };
+    devShell = pkgs.mkShell { buildInputs = [ pkgs.devEnv ]; };
     defaultApp = flake-utils.lib.mkApp {
       drv = pkgs.writeScriptBin "system-switch"
         "exec ${defaultPackage}/sw/bin/darwin-rebuild switch --flake";
