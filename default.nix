@@ -28,11 +28,11 @@
     });
 
     nixosConfiguration = darwinConfig {
-      modules = nixosModules ++ [
+      modules = [
         nix-darwin.darwinModules.flakeOverrides
         home-manager.darwinModules.home-manager
         { nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ]; }
-      ];
+      ] ++ nixosModules;
       inputs = {
         inherit nixpkgs;
         darwin = nix-darwin;
