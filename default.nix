@@ -1,4 +1,4 @@
-{ nixpkgs, ... }@args:
+{ nixpkgs, self, ... }@args:
 (nixpkgs.lib.fix (mkDarwinSystem:
   { hostName, nixpkgs, nix-darwin, flake-utils, home-manager
   , system ? builtins.currentSystem or "aarch64-darwin", nixosModules ? [ ]
@@ -62,8 +62,11 @@
       packages = [ nixosConfiguration.pkgs.sysEnv ];
     };
     defaultApp = flake-utils.lib.mkApp {
-      drv = nixosConfiguration.pkgs.writeScriptBin "system-switch"
-        "exec ${defaultPackage}/sw/bin/darwin-rebuild switch --flake";
+      drv = nixosConfiguration.pkgs.writeScriptBin "switch"
+        ''#!${nixosConfiguration.pkgs.bash}/bin/bash
+        set -x
+        exec ${defaultPackage}/sw/bin/darwin-rebuild switch --flake .
+        '';
     };
 
     outputs = {
