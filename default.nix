@@ -1,10 +1,9 @@
 { nixpkgs, ... }@args:
 (nixpkgs.lib.fix (mkDarwinSystem:
-  { hostName, system, nixpkgs, nix-darwin, flake-utils, home-manager
-  , nixosModules ? [ ]
+  { hostName, nixpkgs, nix-darwin, flake-utils, home-manager
+  , system ? builtins.currentSystem or "aarch64-darwin", nixosModules ? [ ]
   , flakeOutputs ? nixpkgs.lib.id
-  , silliconOverlay ? (silliconPkgs: intelPkgs: {})
-  , ... }@args:
+  , silliconOverlay ? (silliconPkgs: intelPkgs: { }), ... }@args:
   let
     darwinConfig = import "${nix-darwin}/eval-config.nix" {
       inherit (nixpkgs) lib;
@@ -13,14 +12,24 @@
 
     silliconBackportOverlay = new: old:
       let
-        sillicon = "aarch64-darwin";
+        isSillicon = old.stdenv.hostPlatform.isDarwin
+          && old.stdenv.hostPlatform.isAarch64;
         intel = "x86_64-darwin";
         intelSystem = mkDarwinSystem (args // { system = intel; });
-      in if system == sillicon then {
+        intelPkgs = intelSystem.pkgs;
+      in if isSillicon then {
         # TODO: Remove when PR gets merged. https://github.com/NixOS/nixpkgs/pull/126195
-        inherit (intelSystem.pkgs) haskell haskellPackages;
-        inherit (silliconOverlay old intelSystem.pkgs);
-      } else { };
+        inherit (intelPkgs) haskell haskellPackages;
+
+        # Marked as broken in aarch64-darwin
+        inherit (intelPkgs)
+          llvmPackages_6 llvmPackages_7 llvmPackages_8 llvmPackages_9
+          llvmPackages_10;
+
+        inherit (silliconOverlay old intelPkgs)
+        ;
+      } else
+        { };
 
     nixpkgsOverlay = (new: old: {
       darwinConfigurations.${hostName}.system = defaultPackage;
@@ -34,7 +43,13 @@
       modules = [
         nix-darwin.darwinModules.flakeOverrides
         home-manager.darwinModules.home-manager
-        { nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ]; }
+        {
+          nixpkgs.config = {
+            localSystem = system;
+            crossSystem = system;
+          };
+          nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ];
+        }
       ] ++ nixosModules;
       inputs = {
         inherit nixpkgs;
