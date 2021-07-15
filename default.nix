@@ -76,8 +76,13 @@
       packages = [ nixosConfiguration.pkgs.sysEnv ];
     };
     defaultApp = flake-utils.lib.mkApp {
-      drv = nixosConfiguration.pkgs.writeScriptBin "activate"
-        "${defaultPackage}/sw/bin/darwin-rebuild activate --flake ${./.}";
+      drv = nixosConfiguration.pkgs.writeScriptBin "activate" ''
+        if [ -z "$*" ]; then
+          ${defaultPackage}/sw/bin/darwin-rebuild activate --flake .
+        else
+          ${defaultPackage}/sw/bin/darwin-rebuild activate "''${@}"
+        fi
+      '';
     };
 
     outputs = {
