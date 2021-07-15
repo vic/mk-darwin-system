@@ -39,6 +39,19 @@
       };
     });
 
+    activationDiffModule = { pkgs, config, ... }: {
+      system.activationScripts.diffClosures.text = ''
+        echo "new configuration diff" >&2
+        $DRY_RUN_CMD ${pkgs.nixUnstable}/bin/nix store \
+            --experimental-features 'nix-command' \
+            diff-closures /run/current-system "$systemConfig" \
+            | sed -e 's/^/[diff]\t/' >&2
+      '';
+
+      system.activationScripts.preActivation.text =
+        config.system.activationScripts.diffClosures.text;
+    };
+
     nixosConfiguration = darwinConfig {
       modules = [
         nix-darwin.darwinModules.flakeOverrides
@@ -50,6 +63,7 @@
           };
           nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ];
         }
+        activationDiffModule
       ] ++ nixosModules;
       inputs = {
         inherit nixpkgs;
@@ -62,11 +76,8 @@
       packages = [ nixosConfiguration.pkgs.sysEnv ];
     };
     defaultApp = flake-utils.lib.mkApp {
-      drv = nixosConfiguration.pkgs.writeScriptBin "switch"
-        ''#!${nixosConfiguration.pkgs.bash}/bin/bash
-        set -x
-        exec ${defaultPackage}/sw/bin/darwin-rebuild switch --flake .
-        '';
+      drv = nixosConfiguration.pkgs.writeScriptBin "activate"
+        "${defaultPackage}/sw/bin/darwin-rebuild activate --flake ${./.}";
     };
 
     outputs = {
