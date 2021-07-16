@@ -10,6 +10,15 @@
       inherit system;
     };
 
+    # adapted from home-manager
+    mkOutOfStoreSymlink = path:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        pathStr = toString path;
+        name = home-manager.lib.hm.strings.storeFileName (baseNameOf pathStr);
+      in pkgs.runCommandLocal name { }
+      "ln -s ${nixpkgs.lib.escapeShellArg pathStr} $out";
+
     silliconBackportOverlay = new: old:
       let
         isSillicon = old.stdenv.hostPlatform.isDarwin
@@ -70,8 +79,10 @@
         darwin = nix-darwin;
       };
       specialArgs = specialArgs {
-        lib =
-          nixpkgs.lib.extend (self: super: { inherit (home-manager.lib) hm; });
+        lib = nixpkgs.lib.extend (self: super: {
+          inherit (home-manager.lib) hm;
+          inherit mkOutOfStoreSymlink;
+        });
       };
     };
 
@@ -81,11 +92,9 @@
     };
     defaultApp = flake-utils.lib.mkApp {
       drv = nixosConfiguration.pkgs.writeScriptBin "activate" ''
-        if [ -z "$*" ]; then
-          ${defaultPackage}/sw/bin/darwin-rebuild activate --flake .
-        else
-          ${defaultPackage}/sw/bin/darwin-rebuild activate "''${@}"
-        fi
+        ${defaultPackage}/sw/bin/darwin-rebuild activate --flake ${
+          mkOutOfStoreSymlink ./.
+        } "''${@}"
       '';
     };
 
