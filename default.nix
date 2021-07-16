@@ -2,7 +2,7 @@
 (nixpkgs.lib.fix (mkDarwinSystem:
   { hostName, nixpkgs, nix-darwin, flake-utils, home-manager
   , system ? builtins.currentSystem or "aarch64-darwin", nixosModules ? [ ]
-  , flakeOutputs ? nixpkgs.lib.id
+  , specialArgs ? nixpkgs.lib.id, flakeOutputs ? nixpkgs.lib.id
   , silliconOverlay ? (silliconPkgs: intelPkgs: { }), ... }@args:
   let
     darwinConfig = import "${nix-darwin}/eval-config.nix" {
@@ -68,6 +68,10 @@
       inputs = {
         inherit nixpkgs;
         darwin = nix-darwin;
+      };
+      specialArgs = specialArgs {
+        lib =
+          nixpkgs.lib.extend (self: super: { inherit (home-manager.lib) hm; });
       };
     };
 

@@ -50,10 +50,15 @@ mkDarwinSystem {
   nixosModules = [];               # a list of modules further customize your darwin system.
   silliconOverlay =                # a function for selecting intelPkgs for packages not available yet in M1, eg:
     (silliconPkgs: intelPkgs: {}); # (silliconPkgs: intelPkgs: { inherit (intelPkgs) haskell haskellPackages; })
+  specialArgs = ({lib}@args:       # a function to customize specialArgs that will be given to all modules.
+   args 
+  );
   flakeOutputs =                   # a function to customize what's exported from your system flake.
     ({
       defaultApp, defaultPackage, devShell, pkgs, nixosConfigurations.${hostName}
-    }@outputs = outputs)
+    }@outputs = outputs // {
+      packages = { inherit (pkgs) hello; };   #  Select some packages to expose from this flake.
+    })
 }
 ```
 
