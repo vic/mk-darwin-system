@@ -1,6 +1,6 @@
 { mkDarwinSystem, flake-utils, nixpkgs }: rec {
-  systems = [ "aarch64-darwin" ];
-  modules = [
+  m1Systems = [ "aarch64-darwin" ];
+  m1Modules = [
     ({ pkgs, ... }: {
       services.nix-daemon.enable = true;
       nix.package = pkgs.nixFlakes;
@@ -13,11 +13,10 @@
     })
   ];
 
-  apply = { nixosModules ? [ ], specialArgs ? nixpkgs.lib.id
-    , silliconOverlay ? (silliconPkgs: intelPkgs: { }) }:
-    flake-utils.lib.eachSystem systems (system:
+  apply = { modules ? [ ] }:
+    flake-utils.lib.eachSystem m1Systems (system:
       mkDarwinSystem {
-        inherit system specialArgs silliconOverlay;
-        nixosModules = nixosModules ++ modules;
+        inherit system;
+        modules = m1Modules ++ modules;
       });
 }

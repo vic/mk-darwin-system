@@ -1,5 +1,5 @@
 {
-  description = "Minimal mkDarwinSystem example";
+  description = "Development environments example";
 
   inputs = {
     # change tag or commit of nixpkgs for your system
@@ -17,38 +17,45 @@
         # Provide your nix modules to enable configurations on your system.
         #
         modules = [
-          # You might want to split them into separate files
-          #  ./modules/host-one-module.nix
-          #  ./modules/user-one-module.nix
-          #  ./modules/user-two-module.nix
-          # Or you can inline them here, eg.
-
-          # for configurable nix-darwin modules see 
-          # https://github.com/LnL7/nix-darwin/blob/master/modules/module-list.nix
           ({ config, pkgs, ... }: {
-            environment.systemPackages = with pkgs; [ nixfmt ];
-          })
-
-          # for configurable home-manager modules see:
-          # https://github.com/nix-community/home-manager/blob/master/modules/modules.nix
-          {
+            environment.systemPackages = with pkgs; [ direnv ];
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
             };
-          }
+          })
 
-          # An example of user environment. Change your username.
-          ({ pkgs, lib, ... }: {
-            home-manager.users."yourUsername" = {
-              home.packages = with pkgs; [ exa ];
-              home.file.".config/foo".text = "bar";
-              programs.git = {
-                enable = true;
-                userName = "Your Name";
-                userEmail = "your@email.com";
-              };
+          ({ config, pkgs, lib, ... }: let 
+	    username = "yourUsername";
+
+	    scalaShell = pkgs.mkShell {
+              packages = with pkgs; [ sbt ];
             };
+
+	    nodeShell = pkgs.mkShell {
+              packages = with pkgs; [ nodejs ];
+            };
+
+	  in {
+            home-manager.users.${username} = {
+
+	      # The following function allows you to have a file `.envrc` with, eg.
+	      # 
+	      # use nix-env scala
+	      #
+	      home.file.".config/direnv/lib/use_nix-env.sh".text = ''
+	      function use_nix-env() {
+		. "''$HOME/.config/direnv/env/''${1}.bash"
+	      }
+	      '';
+
+
+              home.file.".config/direnv/env/scala.bash".source = 
+	        lib.mds.shellEnv scalaShell;
+              home.file.".config/direnv/env/node.bash".source = 
+	        lib.mds.shellEnv nodeShell;
+            };
+            services.lorri.enable = true;
           })
 
           # for configurable nixos modules see (note that many of them might be linux-only):
@@ -60,9 +67,6 @@
                 inherit (nixpkgs.legacyPackages.x86_64-darwin) pandoc;
               })
             ];
-
-            # You can enable supported services (if they work on arm and are not linux only)
-            #services.lorri.enable = true;
           }
 
         ];

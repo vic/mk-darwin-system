@@ -1,57 +1,26 @@
 { nixpkgs, flake-utils, nix-darwin, home-manager, mk-darwin-system, ... }:
 nixpkgs.lib.fix (mkDarwinSystem:
-  { system ? builtins.currentSystem or "aarch64-darwin", nixosModules ? [ ]
-  , specialArgs ? nixpkgs.lib.id
-  , silliconOverlay ? (silliconPkgs: intelPkgs: { }), ... }@args:
+  { system ? builtins.currentSystem or "aarch64-darwin", modules ? [ ], ...
+  }@args:
   let
     evalDarwinConfig =
       import "${nix-darwin}/eval-config.nix" { inherit (nixpkgs) lib; };
 
-    # adapted from home-manager
-    mkOutOfStoreSymlink = path:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        pathStr = toString path;
-        name = home-manager.lib.hm.strings.storeFileName (baseNameOf pathStr);
-      in pkgs.runCommandLocal name { }
-      "ln -s ${nixpkgs.lib.escapeShellArg pathStr} $out";
-
-    silliconBackportOverlay = new: old:
-      let
-        isSillicon = old.stdenv.hostPlatform.isDarwin
-          && old.stdenv.hostPlatform.isAarch64;
-        intelPkgs = nixpkgs.legacyPackages.x86_64-darwin;
-      in if isSillicon then
-        {
-          # Common packages that are still not able to build on m1
-          inherit (intelPkgs) pandoc;
-
-          # Marked as broken in aarch64-darwin
-          inherit (intelPkgs)
-            llvmPackages_6 llvmPackages_7 llvmPackages_8 llvmPackages_9
-            llvmPackages_10;
-
-        } // (silliconOverlay old intelPkgs)
-      else
-        { };
-
-    activationDiffModule = { config, ... }: {
-      system.activationScripts.diffClosures.text = ''
-        if [ -e /run/current-system ]; then
-          echo "new configuration diff" >&2
-          $DRY_RUN_CMD ${config.nix.package}/bin/nix store \
-              --experimental-features 'nix-command' \
-              diff-closures /run/current-system "$systemConfig" \
-              | sed -e 's/^/[diff]\t/' >&2
-        fi
-      '';
-
-      system.activationScripts.preActivation.text =
-        config.system.activationScripts.diffClosures.text;
-    };
-
-    nixosConfiguration = evalDarwinConfig {
+    nixosConfiguration = evalDarwinConfig (args // {
       inherit system;
+      inputs = {
+        inherit nixpkgs;
+        darwin = nix-darwin;
+      };
+      specialArgs = {
+        lib = nixpkgs.lib.extend (self: super: {
+          inherit (home-manager.lib) hm;
+          mds = mk-darwin-system.mkDarwinSystem.lib {
+            lib = self;
+            pkgs = import nixpkgs { inherit system; };
+          };
+        });
+      };
       modules = [
         nix-darwin.darwinModules.flakeOverrides
         home-manager.darwinModules.home-manager
@@ -60,27 +29,15 @@ nixpkgs.lib.fix (mkDarwinSystem:
             localSystem = system;
             crossSystem = system;
           };
-          nixpkgs.overlays = [ silliconBackportOverlay ];
         }
-        activationDiffModule
-      ] ++ nixosModules;
-      inputs = {
-        inherit nixpkgs;
-        darwin = nix-darwin;
-      };
-      specialArgs = specialArgs {
-        inherit mk-darwin-system;
-        lib = nixpkgs.lib.extend (self: super: {
-          inherit (home-manager.lib) hm;
-          inherit mkOutOfStoreSymlink;
-        });
-      };
-    };
+        ./../modules
+      ] ++ modules;
+    });
 
     defaultPackage = nixosConfiguration.system;
 
     devShell = nixosConfiguration.pkgs.mkShell {
-      packages = [ nixosConfiguration.system ];
+      packages = nixosConfiguration.config.environment.systemPackages;
     };
 
     defaultApp = flake-utils.lib.mkApp {

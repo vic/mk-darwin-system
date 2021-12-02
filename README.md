@@ -62,7 +62,24 @@ nix run # same as calling: ./result/sw/bin/darwin-rebuild activate --flake .
 ## See Also
 ##### [minimal](templates/minimal)
 
+`nix flake init -t 'github:vic/mk-darwin-system#minimal'`
+
 The reference template you can edit to build your system upon.
+##### [dev-envs](templates/dev-envs)
+
+`nix flake init -t 'github:vic/mk-darwin-system#dev-envs'`
+
+And example that shows how to setup `direnv` for *fast* *cached*
+environments built along with your system. 
+No need to use _lorri_ daemons. 
+Loading the environment is as fast as sourcing a dump of environment variables.
+
+##### [niv-managed-apps](templates/niv-managed-apps)
+
+`nix flake init -t 'github:vic/mk-darwin-system#niv-managed-apps'`
+
+An example showing how to install `.dmg` Apps while managing them with `niv`.
+Links an home-manager installed Applications/ on user home.
 ###### [vix - Vic's Nix Environment](http://github.com/vic/vix)
 
 vic's environment built using mkDarwinSystem.
