@@ -1,7 +1,6 @@
 { nixpkgs, ... }:
 { pkgs, lib, ... }:
-let
-  intelPkgs = nixpkgs.legacyPackages.x86_64-darwin;
+let intelPkgs = nixpkgs.legacyPackages.x86_64-darwin;
 in {
 
   inherit intelPkgs;

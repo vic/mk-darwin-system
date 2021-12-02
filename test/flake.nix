@@ -14,15 +14,15 @@
     template-envs.inputs.mk-darwin-system.follows = "mk-darwin-system";
   };
 
-  outputs = {self, mk-darwin-system, template-minimal, template-apps, template-envs, ...}: 
-  let
-    inherit (mk-darwin-system.inputs) nixpkgs;
-  in
-  {
-    checks = {
-      template-minimal.buildInputs = template-minimal.defaultPackage.aarch64-darwin;
-      template-apps.buildInputs = template-apps.defaultPackage.aarch64-darwin;
-      template-envs.buildInputs = template-envs.defaultPackage.aarch64-darwin;
+  outputs = { self, mk-darwin-system, template-minimal, template-apps
+    , template-envs, ... }:
+    let inherit (mk-darwin-system.inputs) nixpkgs;
+    in {
+      checks = {
+        template-minimal.buildInputs =
+          template-minimal.defaultPackage.aarch64-darwin;
+        template-apps.buildInputs = template-apps.defaultPackage.aarch64-darwin;
+        template-envs.buildInputs = template-envs.defaultPackage.aarch64-darwin;
+      };
     };
-  };
 }

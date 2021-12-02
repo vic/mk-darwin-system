@@ -41,11 +41,9 @@
         lib = import ./lib { inherit nixpkgs; };
       };
 
-      devShell.aarch64-darwin = let 
+      devShell.aarch64-darwin = let
         pkgs = nixpkgs.legacyPackages.aarch64-darwin;
         intelPkgs = nixpkgs.legacyPackages.x86_64-darwin;
-      in pkgs.mkShell {
-        packages = [ pkgs.nixfmt intelPkgs.niv ];
-      };
+      in pkgs.mkShell { packages = [ pkgs.nixfmt intelPkgs.niv ]; };
     };
 }

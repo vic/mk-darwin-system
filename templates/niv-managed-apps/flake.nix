@@ -3,7 +3,7 @@
 
   inputs = {
     # change tag or commit of nixpkgs for your system
-    nixpkgs.url = "github:nixos/nixpkgs/21.11"; 
+    nixpkgs.url = "github:nixos/nixpkgs/21.11";
 
     # change main to a tag o git revision
     mk-darwin-system.url = "github:vic/mk-darwin-system/main";
@@ -40,20 +40,21 @@
             };
           })
 
-          ({ lib, ...}: {
-            nixpkgs.overlays = let 
-              nivSources = import ./nix/sources.nix ;
-            in [(new: old: {
-              # You can provide an overlay for packages not available or that fail to compile on arm.
-              inherit (nixpkgs.legacyPackages.x86_64-darwin) pandoc niv;
-              
-              # Provide apps managed by niv
-              KeyttyApp = lib.mds.installNivDmg {
-                name = "Keytty";
-                src = nivSources.KeyttyApp;
-              };
+          ({ lib, ... }: {
+            nixpkgs.overlays = let nivSources = import ./nix/sources.nix;
+            in [
+              (new: old: {
+                # You can provide an overlay for packages not available or that fail to compile on arm.
+                inherit (nixpkgs.legacyPackages.x86_64-darwin) pandoc niv;
 
-            })];
+                # Provide apps managed by niv
+                KeyttyApp = lib.mds.installNivDmg {
+                  name = "Keytty";
+                  src = nivSources.KeyttyApp;
+                };
+
+              })
+            ];
           })
 
         ];
