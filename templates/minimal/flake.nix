@@ -5,7 +5,8 @@
     nixpkgs.url =
       "github:nixos/nixpkgs/21.11"; # change tag or commit of nixpkgs for your system
 
-    mk-darwin-system.url = "github:vic/mk-darwin-system/main"; # change main to a tag o git revision
+    mk-darwin-system.url =
+      "github:vic/mk-darwin-system/main"; # change main to a tag o git revision
     #mk-darwin-system.url = "path:/hk/mkDarwinSystem"; # development mode
     mk-darwin-system.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -37,6 +38,20 @@
               useUserPackages = true;
             };
           }
+
+          # An example of user environment. Change your username.
+          ({ pkgs, lib, ... }: {
+            home-manager.users."yourUsername" = {
+              home.packages = with pkgs; [ fish ];
+
+              home.activation = {
+                # Link apps installed by home-manager.
+                aliasApplications = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+                  ln -sfn $genProfilePath/home-path/Applications "$HOME/Applications/Home Manager Applications"
+                '';
+              };
+            };
+          })
 
           # for configurable nixos modules see (note that many of them might be linux-only):
           # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/module-list.nix
