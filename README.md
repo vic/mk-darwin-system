@@ -1,67 +1,68 @@
 # mk-darwin-system
 [vic](http://twitter.com/oeiuwq)'s small utility to create a full ( [nixFlakes](https://nixos.wiki/wiki/Flakes) + [nix-darwin](https://daiderd.com/nix-darwin/) + [home-manager](https://github.com/nix-community/home-manager) )  [nixOS](https://nixos.org/) system.
 
-## Prerequisites
+## Getting Started
 
-Install `nixFlakes` on your system and create a flake based on the examples bellow (or just cd into `examples/minimal`).
+#### [Install `nixFlakes`](https://nixos.wiki/wiki/Flakes#Non-NixOS) on your system.
 
-Use `nix build` and inspect `./result`. If all is good, activate your system with `nix run`.
+  In order to bootstrap your system, nixFlakes needs to be installed. 
+  Also while bootstrapping the flake experimental commands need to be enabled.
 
-## Usage
+  Be sure to enable flakes experimental commands by editing your `nix.conf` file or by
+  using the `nix --experimental-features "nix-command flakes"` command.
+  Following examples assume you already enabled these experimental features.
 
-Follow one of the examples bellow to create a flake that creates a nixos configuration.
 
-For example, using the `examples/minimal`, you can see that `mk-darwin-system` produces a flake with
-the following outputs: 
+  Tip: If you create a file `$PWD/nix.conf` with the following content:
 
-  - `nixosConfigurations.aarch64-darwin.${hostName}`: The full nixos configuration for the configured host.
-  - `defaultPackage`: The full darwin system derivation. Use `nix build` to see it in `./result`
-  - `defaultApp`: An app that activates the darwin system. Use `nix run` to activate your system.
-  - `devShell`: An environment containing system packages. Use `nix develop` to enter a shell with the system environment; or `nix print-dev-env` with something like [direnv](https://direnv.net/) to load the environment in your current shell.
-  - `pkgs`: A set of all packages available in the nixos system. ie, You can build `nix build '.#pkgs.aarch64-darwin.hello'`.
-  - `packages`: A set of exposed packages (shown by `nix flake show`). ie, You can build `nix build '.#hello'`
-
-```
-> cd examples/minimal
-> nix flake show
-git+file:///hk/mk-darwin-system?dir=examples%2fminimal
-├───defaultApp
-│   └───aarch64-darwin: app
-├───defaultPackage
-│   └───aarch64-darwin: package 'darwin-system-21.11.20210704.4e82100+darwin4.007d700'
-├───devShell
-│   └───aarch64-darwin: development environment 'nix-shell'
-├───nixosConfigurations
-│   └───aarch64-darwin: NixOS configuration
-├───packages
-│   └───aarch64-darwin
-│       └───hello: package 'hello-2.10'
-└───pkgs: unknown
+```conf
+system = aarch64-darwin
+extra-platforms = aarch64-darwin x86_64-darwin 
+experimental-features = nix-command flakes
+build-users-group = nixbld
 ```
 
-### Options
+  then you might `export NIX_CONF_DIR="$PWD"` and avoid typing long nix commands.
 
-The provided `mkDarwinSystem` can take the following options:
+#### Create your darwinSystem flake:
 
-```nix
-mkDarwinSystem {
-  system   = "aarch64-darwin";
-  hostName = "example";            # hostName used to bind darwinConfigurations.${system}.${hostName}
-  nixosModules = [];               # a list of modules further customize your darwin system.
-  silliconOverlay =                # a function for selecting intelPkgs for packages not available yet in M1, eg:
-    (silliconPkgs: intelPkgs: {}); # (silliconPkgs: intelPkgs: { inherit (intelPkgs) haskell haskellPackages; })
-  specialArgs = ({lib}@args:       # a function to customize specialArgs that will be given to all modules.
-   args 
-  );
-  flakeOutputs =                   # a function to customize what's exported from your system flake.
-    ({
-      defaultApp, defaultPackage, devShell, pkgs, nixosConfigurations.${hostName}
-    }@outputs = outputs // {
-      packages = { inherit (pkgs) hello; };   #  Select some packages to expose from this flake.
-    })
-}
+```shell
+mkdir my-system; cd my-system;
+nix flake init -t github:vic/mk-darwin-system
 ```
 
-### Examples
-##### [minimal](examples/minimal)
+#### Build and Activate your system
+
+```shell
+# Edit your generated flake.nix and customize your environment.
+
+# Make sure your system builds
+nix build --show-trace
+ls result/ # if everything went ok, you'll have a darwin system in here, inspect it.
+
+# Activate your system. For this to work, make sure your hostname is a nixosConfigurations attr.
+nix run # same as calling: ./result/sw/bin/darwin-rebuild activate --flake .
+```
+
+## Cheat sheet.
+
+- `nix run`
+  the default app builds and activates your system.
+
+- `nix build --show-trace`
+  builds your system on `./result` and shows an stacktrace on error.
+
+- `nix develop`
+  enters an interactive shell with your system-environment packages enabled.
+
+- `nix run '.#pkgs.aarch64-darwin.hello'`
+  allows you to run apps directly.
+
+
+## See Also
+##### [minimal](templates/minimal)
+
+The reference template you can edit to build your system upon.
 ###### [vix - Vic's Nix Environment](http://github.com/vic/vix)
+
+vic's environment built using mkDarwinSystem.

@@ -1,14 +1,11 @@
-{ nixpkgs, self, ... }@args:
-(nixpkgs.lib.fix (mkDarwinSystem:
-  { hostName, nixpkgs, nix-darwin, flake-utils, home-manager
-  , system ? builtins.currentSystem or "aarch64-darwin", nixosModules ? [ ]
-  , specialArgs ? nixpkgs.lib.id, flakeOutputs ? nixpkgs.lib.id
+{ nixpkgs, flake-utils, nix-darwin, home-manager, mk-darwin-system, ... }:
+nixpkgs.lib.fix (mkDarwinSystem:
+  { system ? builtins.currentSystem or "aarch64-darwin", nixosModules ? [ ]
+  , specialArgs ? nixpkgs.lib.id
   , silliconOverlay ? (silliconPkgs: intelPkgs: { }), ... }@args:
   let
-    darwinConfig = import "${nix-darwin}/eval-config.nix" {
-      inherit (nixpkgs) lib;
-      inherit system;
-    };
+    evalDarwinConfig =
+      import "${nix-darwin}/eval-config.nix" { inherit (nixpkgs) lib; };
 
     # adapted from home-manager
     mkOutOfStoreSymlink = path:
@@ -26,33 +23,40 @@
         intel = "x86_64-darwin";
         intelSystem = mkDarwinSystem (args // { system = intel; });
         intelPkgs = intelSystem.pkgs;
-      in if isSillicon then {
-        # TODO: Remove when PR gets merged. https://github.com/NixOS/nixpkgs/pull/126195
-        inherit (intelPkgs) haskell haskellPackages;
+      in if isSillicon then
+        {
+          # Common packages that are still not able to build on m1
+          # inherit (intelPkgs) pandoc git-annex niv;
 
-        # Marked as broken in aarch64-darwin
-        inherit (intelPkgs)
-          llvmPackages_6 llvmPackages_7 llvmPackages_8 llvmPackages_9
-          llvmPackages_10;
+          # Marked as broken in aarch64-darwin
+          inherit (intelPkgs)
+            llvmPackages_6 llvmPackages_7 llvmPackages_8 llvmPackages_9
+            llvmPackages_10;
 
-        inherit (silliconOverlay old intelPkgs)
-        ;
-      } else
+        } // (silliconOverlay old intelPkgs)
+      else
         { };
 
-    nixpkgsOverlay = (new: old: {
-      darwinConfigurations.${hostName}.system = defaultPackage;
-      sysEnv = new.buildEnv {
-        name = "sysEnv";
-        paths = nixosConfiguration.config.environment.systemPackages;
-      };
-    });
+    # darwin-flake = pkgs: pkgs.writeScriptBin "darwin-flake" ''
+    #   ${nixosConfiguration.system}/sw/bin/darwin-rebuild --flake ${
+    #     mkOutOfStoreSymlink ./.
+    #   } "''${@}"
+    # '';
 
-    activationDiffModule = { pkgs, config, ... }: {
+    nixpkgsOverlayModule = { config, pkgs, ... }: {
+      nixpkgs.overlays = [
+        (new: old:
+          {
+            # darwin-flake = darwin-flake pkgs;
+          })
+      ];
+    };
+
+    activationDiffModule = { config, ... }: {
       system.activationScripts.diffClosures.text = ''
         if [ -e /run/current-system ]; then
           echo "new configuration diff" >&2
-          $DRY_RUN_CMD ${pkgs.nixUnstable}/bin/nix store \
+          $DRY_RUN_CMD ${config.nix.package}/bin/nix store \
               --experimental-features 'nix-command' \
               diff-closures /run/current-system "$systemConfig" \
               | sed -e 's/^/[diff]\t/' >&2
@@ -63,7 +67,8 @@
         config.system.activationScripts.diffClosures.text;
     };
 
-    nixosConfiguration = darwinConfig {
+    nixosConfiguration = evalDarwinConfig {
+      inherit system;
       modules = [
         nix-darwin.darwinModules.flakeOverrides
         home-manager.darwinModules.home-manager
@@ -72,8 +77,9 @@
             localSystem = system;
             crossSystem = system;
           };
-          nixpkgs.overlays = [ nixpkgsOverlay silliconBackportOverlay ];
+          nixpkgs.overlays = [ silliconBackportOverlay ];
         }
+        nixpkgsOverlayModule
         activationDiffModule
       ] ++ nixosModules;
       inputs = {
@@ -81,6 +87,7 @@
         darwin = nix-darwin;
       };
       specialArgs = specialArgs {
+        inherit mk-darwin-system;
         lib = nixpkgs.lib.extend (self: super: {
           inherit (home-manager.lib) hm;
           inherit mkOutOfStoreSymlink;
@@ -89,9 +96,11 @@
     };
 
     defaultPackage = nixosConfiguration.system;
+
     devShell = nixosConfiguration.pkgs.mkShell {
-      packages = [ nixosConfiguration.pkgs.sysEnv ];
+      packages = [ nixosConfiguration.system ];
     };
+
     defaultApp = flake-utils.lib.mkApp {
       drv = nixosConfiguration.pkgs.writeScriptBin "activate" ''
         ${defaultPackage}/sw/bin/darwin-rebuild activate --flake ${
@@ -101,9 +110,8 @@
     };
 
     outputs = {
-      inherit defaultApp defaultPackage devShell;
-      pkgs = nixosConfiguration.pkgs;
-      nixosConfigurations.${hostName} = nixosConfiguration;
+      inherit defaultApp defaultPackage devShell nixosConfiguration;
+      inherit (nixosConfiguration) pkgs;
     };
 
-  in flakeOutputs outputs)) args
+  in outputs)
