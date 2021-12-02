@@ -1,2 +1,4 @@
 flake.lock
 result*
+test/flake.lock
+templates/*/flake.lock
