@@ -41,14 +41,14 @@
                 # use nix-env scala
                 #
                 home.file.".config/direnv/lib/use_nix-env.sh".text = ''
-                        function use_nix-env() {
-                  	. "$HOME/.config/direnv/env/''${1}.bash"
-                        }
-                        '';
+                  function use_nix-env() {
+                  	. "$HOME/.config/direnv/nix-envs/''${1}/env"
+                  }
+                '';
 
-                home.file.".config/direnv/env/scala.bash".source =
+                home.file.".config/direnv/nix-envs/scala".source =
                   lib.mds.shellEnv scalaShell;
-                home.file.".config/direnv/env/node.bash".source =
+                home.file.".config/direnv/nix-envs/node".source =
                   lib.mds.shellEnv nodeShell;
               };
 
