@@ -20,13 +20,11 @@ nixpkgs.lib.fix (mkDarwinSystem:
       let
         isSillicon = old.stdenv.hostPlatform.isDarwin
           && old.stdenv.hostPlatform.isAarch64;
-        intel = "x86_64-darwin";
-        intelSystem = mkDarwinSystem (args // { system = intel; });
-        intelPkgs = intelSystem.pkgs;
+        intelPkgs = nixpkgs.legacyPackages.x86_64-darwin;
       in if isSillicon then
         {
           # Common packages that are still not able to build on m1
-          # inherit (intelPkgs) pandoc git-annex niv;
+          inherit (intelPkgs) pandoc;
 
           # Marked as broken in aarch64-darwin
           inherit (intelPkgs)
@@ -36,21 +34,6 @@ nixpkgs.lib.fix (mkDarwinSystem:
         } // (silliconOverlay old intelPkgs)
       else
         { };
-
-    # darwin-flake = pkgs: pkgs.writeScriptBin "darwin-flake" ''
-    #   ${nixosConfiguration.system}/sw/bin/darwin-rebuild --flake ${
-    #     mkOutOfStoreSymlink ./.
-    #   } "''${@}"
-    # '';
-
-    nixpkgsOverlayModule = { config, pkgs, ... }: {
-      nixpkgs.overlays = [
-        (new: old:
-          {
-            # darwin-flake = darwin-flake pkgs;
-          })
-      ];
-    };
 
     activationDiffModule = { config, ... }: {
       system.activationScripts.diffClosures.text = ''
@@ -79,7 +62,6 @@ nixpkgs.lib.fix (mkDarwinSystem:
           };
           nixpkgs.overlays = [ silliconBackportOverlay ];
         }
-        nixpkgsOverlayModule
         activationDiffModule
       ] ++ nixosModules;
       inputs = {
@@ -103,9 +85,7 @@ nixpkgs.lib.fix (mkDarwinSystem:
 
     defaultApp = flake-utils.lib.mkApp {
       drv = nixosConfiguration.pkgs.writeScriptBin "activate" ''
-        ${defaultPackage}/sw/bin/darwin-rebuild activate --flake ${
-          mkOutOfStoreSymlink ./.
-        } "''${@}"
+        ${defaultPackage}/sw/bin/darwin-rebuild activate --flake . "''${@}"
       '';
     };
 
