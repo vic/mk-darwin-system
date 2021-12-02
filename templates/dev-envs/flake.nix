@@ -51,19 +51,8 @@
                 home.file.".config/direnv/env/node.bash".source =
                   lib.mds.shellEnv nodeShell;
               };
-              services.lorri.enable = true;
-            })
 
-          # for configurable nixos modules see (note that many of them might be linux-only):
-          # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/module-list.nix
-          {
-            # You can provide an overlay for packages not available or that fail to compile on arm.
-            nixpkgs.overlays = [
-              (new: old: {
-                inherit (nixpkgs.legacyPackages.x86_64-darwin) pandoc;
-              })
-            ];
-          }
+            })
 
         ];
       };
