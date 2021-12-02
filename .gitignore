@@ -1,2 +1,3 @@
+templates/minimal/flake.lock
+templates/minimal/result*
 result*
-flake.lock
