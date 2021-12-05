@@ -41,8 +41,18 @@
           # An example of user environment. Change your username.
           ({ pkgs, lib, ... }: {
             home-manager.users."yourUsername" = {
+
               home.packages = with pkgs; [ exa ];
+
+              # enable at least one shell. as for any other program, see customizable options at:
+              # https://github.com/nix-community/home-manager/blob/master/modules/programs/<program>.nix
+              programs.zsh.enable = true;
+              # programs.fish.enable = true;
+              # programs.bash.enable = true;
+
+              # create some custom dot-files on your user's home.
               home.file.".config/foo".text = "bar";
+
               programs.git = {
                 enable = true;
                 userName = "Your Name";
