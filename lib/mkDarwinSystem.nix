@@ -1,7 +1,7 @@
 { nixpkgs, flake-utils, nix-darwin, home-manager, mk-darwin-system, ... }:
 nixpkgs.lib.fix (mkDarwinSystem:
-  { system ? builtins.currentSystem or "aarch64-darwin", modules ? [ ], ...
-  }@args:
+  { flakePath ? ".", system ? builtins.currentSystem or "aarch64-darwin"
+  , modules ? [ ], ... }@args:
   let
     evalDarwinConfig =
       import "${nix-darwin}/eval-config.nix" { inherit (nixpkgs) lib; };
@@ -41,8 +41,12 @@ nixpkgs.lib.fix (mkDarwinSystem:
     };
 
     defaultApp = flake-utils.lib.mkApp {
-      drv = nixosConfiguration.pkgs.writeScriptBin "activate" ''
-        ${defaultPackage}/sw/bin/darwin-rebuild activate --flake . "''${@}"
+      drv = darwinConfiguration.pkgs.writeScriptBin "darwin-flake-switch" ''
+      if [ -z "$*" ]; then
+        exec ${darwinConfiguration.system}/sw/bin/darwin-rebuild --flake ${flakePath} switch
+      else
+        exec ${darwinConfiguration.system}/sw/bin/darwin-rebuild --flake ${flakePath} "''${@}"
+      fi
       '';
     };
 

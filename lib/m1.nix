@@ -13,10 +13,10 @@
     })
   ];
 
-  apply = { modules ? [ ] }:
+  apply = { modules ? [ ], flakePath ? "." }:
     flake-utils.lib.eachSystem m1Systems (system:
       mkDarwinSystem {
-        inherit system;
+        inherit system flakePath;
         modules = m1Modules ++ modules;
       });
 }
