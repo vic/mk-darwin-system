@@ -63,17 +63,14 @@
 
           # for configurable nixos modules see (note that many of them might be linux-only):
           # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/module-list.nix
-          {
+          ({ config, lib, ... }: {
             # You can provide an overlay for packages not available or that fail to compile on arm.
-            nixpkgs.overlays = [
-              (new: old: {
-                inherit (nixpkgs.legacyPackages.x86_64-darwin) pandoc;
-              })
-            ];
+            nixpkgs.overlays =
+              [ (self: super: { inherit (lib.mds.intelPkgs) pandoc niv; }) ];
 
             # You can enable supported services (if they work on arm and are not linux only)
             #services.lorri.enable = true;
-          }
+          })
 
         ];
       };
