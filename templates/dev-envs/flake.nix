@@ -19,10 +19,6 @@
         modules = [
           ({ config, pkgs, ... }: {
             environment.systemPackages = with pkgs; [ direnv ];
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-            };
           })
 
           ({ config, pkgs, lib, ... }:

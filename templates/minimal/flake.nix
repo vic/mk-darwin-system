@@ -33,8 +33,8 @@
           # https://github.com/nix-community/home-manager/blob/master/modules/modules.nix
           {
             home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
+              # sharedModules = []; # per-user modules.
+              # extraSpecialArgs = {}; # pass aditional arguments to all modules.
             };
           }
 

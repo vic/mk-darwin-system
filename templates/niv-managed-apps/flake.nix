@@ -20,10 +20,6 @@
           # System module
           ({ config, pkgs, ... }: {
             environment.systemPackages = with pkgs; [ nixfmt niv ];
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-            };
           })
 
           # User module
