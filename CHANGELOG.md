@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://www.github.com/vic/mk-darwin-system/compare/v0.1.0...v0.2.0) (2021-12-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* By using `darwinConfiguration` instead of `nixosConfiguration` we are able to use `darwin-rebuild --flake .` since nix-darwin expects the first attribute path and not the second.
+
+### Features
+
+* useGlobalPkgs, useUserPackages always true ([9a32b5b](https://www.github.com/vic/mk-darwin-system/commit/9a32b5b4077a87e1318624c030e4309433168da7))
+
+
+### Bug Fixes
+
+* Correct user and system PATH on shell init ([ab390ae](https://www.github.com/vic/mk-darwin-system/commit/ab390aea27d1230a6d204b0be1cd40755b2f1655))
+* Flake should expose `darwinConfiguration` ([ba4bce1](https://www.github.com/vic/mk-darwin-system/commit/ba4bce1a02358c94adad82461ea45318501a0915))
+
 ## [0.1.0](https://www.github.com/vic/mk-darwin-system/compare/444fd6c...v0.1.0)
 
 ### Features
