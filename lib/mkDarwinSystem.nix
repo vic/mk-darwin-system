@@ -6,7 +6,7 @@ nixpkgs.lib.fix (mkDarwinSystem:
     evalDarwinConfig =
       import "${nix-darwin}/eval-config.nix" { inherit (nixpkgs) lib; };
 
-    nixosConfiguration = evalDarwinConfig (args // {
+    darwinConfiguration = evalDarwinConfig {
       inherit system;
       inputs = {
         inherit nixpkgs;
@@ -32,12 +32,12 @@ nixpkgs.lib.fix (mkDarwinSystem:
         }
         ./../modules
       ] ++ modules;
-    });
+    };
 
-    defaultPackage = nixosConfiguration.system;
+    defaultPackage = darwinConfiguration.system;
 
-    devShell = nixosConfiguration.pkgs.mkShell {
-      packages = nixosConfiguration.config.environment.systemPackages;
+    devShell = darwinConfiguration.pkgs.mkShell {
+      packages = darwinConfiguration.config.environment.systemPackages;
     };
 
     defaultApp = flake-utils.lib.mkApp {
@@ -47,8 +47,8 @@ nixpkgs.lib.fix (mkDarwinSystem:
     };
 
     outputs = {
-      inherit defaultApp defaultPackage devShell nixosConfiguration;
-      inherit (nixosConfiguration) pkgs;
+      inherit defaultApp defaultPackage devShell darwinConfiguration;
+      inherit (darwinConfiguration) pkgs;
     };
 
   in outputs)

@@ -61,7 +61,7 @@
       };
     in darwinFlakeOutput // {
       # Your custom flake output here.
-      nixosConfigurations."your-m1-hostname" =
-        darwinFlakeOutput.nixosConfiguration.aarch64-darwin;
+      darwinConfigurations."your-m1-hostname" =
+        darwinFlakeOutput.darwinConfiguration.aarch64-darwin;
     };
 }
