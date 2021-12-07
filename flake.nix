@@ -27,6 +27,11 @@
           path = ./templates/minimal;
         };
 
+        dev-envs = {
+          description = "mkDarwinSystem with direnv devloper environments";
+          path = ./templates/dev-envs;
+        };
+
         niv-managed-apps = {
           description = "mkDarwinSystem with macos apps managed with niv";
           path = ./templates/niv-managed-apps;
