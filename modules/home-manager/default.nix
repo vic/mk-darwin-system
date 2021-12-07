@@ -1,4 +1,6 @@
-{
-  config.home-manager.sharedModules =
-    [ ./shared/fish.nix ./shared/zsh.nix ./shared/bash.nix ];
+{ config, ... }@args: {
+  home-manager = {
+
+    sharedModules = [ (import ./shared/init-shell-path.nix args) ];
+  };
 }
