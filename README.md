@@ -5,8 +5,8 @@
 
 #### [Install `nixFlakes`](https://nixos.wiki/wiki/Flakes#Non-NixOS) on your system.
 
-  In order to bootstrap your system, nixFlakes needs to be installed. 
-  Also while bootstrapping the flake experimental commands need to be enabled.
+  In order to bootstrap your system, nixFlakes needs to be installed
+  and the flake experimental commands need to be enabled.
 
   Be sure to enable flakes experimental commands by editing your `nix.conf` file or by
   using the `nix --experimental-features "nix-command flakes"` command.
@@ -31,17 +31,25 @@ mkdir my-system; cd my-system;
 nix flake init -t github:vic/mk-darwin-system
 ```
 
-#### Build and Activate your system
+#### Customize, Build and Activate your system
 
 ```shell
-# Edit your generated flake.nix and customize your environment.
+# 1) first step is checking your system configuration is ok.
+nix run . -- check
 
-# Make sure your system builds
-nix build --show-trace
-ls result/ # if everything went ok, you'll have a darwin system in here, inspect it.
+# 2) Edit your generated flake.nix and customize your environment.
+# after editing your configuration, you might want to run step 1 again.
 
-# Activate your system. For this to work, make sure your hostname is a nixosConfigurations attr.
-nix run # same as calling: ./result/sw/bin/darwin-rebuild activate --flake .
+# 3) If everything went ok, you can switch to your new system using
+nix run # same as: nix run . -- switch
+```
+
+Alternatively, or for debugging, you might want to build and activate manually with:
+
+```shell
+nix build # outputs your system into ./result/
+./result/sw/bin/darwin-rebuild activate --flake .
+# you might also be interested in ./result/activate and ./result/activate-user
 ```
 
 ## Cheat sheet.
@@ -49,11 +57,11 @@ nix run # same as calling: ./result/sw/bin/darwin-rebuild activate --flake .
 - `nix run`
   the default app builds and activates your system.
 
-- `nix build --show-trace`
-  builds your system on `./result` and shows an stacktrace on error.
-
 - `nix develop`
   enters an interactive shell with your system-environment packages enabled.
+
+- `nix run . -- --help`
+  executes `darwin-rebuild` in the context of your flake.
 
 - `nix run '.#pkgs.aarch64-darwin.hello'`
   allows you to run apps directly.
@@ -65,6 +73,7 @@ nix run # same as calling: ./result/sw/bin/darwin-rebuild activate --flake .
 `nix flake init -t 'github:vic/mk-darwin-system#minimal'`
 
 The reference template you can edit to build your system upon.
+
 ##### [dev-envs](templates/dev-envs)
 
 `nix flake init -t 'github:vic/mk-darwin-system#dev-envs'`
