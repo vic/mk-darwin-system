@@ -2,7 +2,7 @@
   description = "Create a nixFlakes + nix-darwin + home-manager system";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/21.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     flake-utils.url = "github:numtide/flake-utils";
     flake-utils.inputs.nixpkgs.follows = "nixpkgs";
