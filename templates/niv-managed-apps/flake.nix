@@ -41,7 +41,7 @@
             in [
               (new: old: {
                 # You can provide an overlay for packages not available or that fail to compile on arm.
-                inherit (lib.mds.intelPkgs) pandoc niv;
+                inherit (lib.mds.intelPkgs) niv;
 
                 # Provide apps managed by niv
                 KeyttyApp = lib.mds.installNivDmg {
