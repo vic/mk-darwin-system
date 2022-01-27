@@ -10,14 +10,11 @@ function mk_setenv() {
 cat <<EOF > $outer/input-derivation
 #!$SHELL
 source $shell_input_derivation
-if [ "\$phases" != "nobuildPhase" ]; then
-  echo "Expected \$name to be an mkShell derivation" >&2
-  exit 1
-fi
+declare -x phases=nobuildPhase
 declare -x nobuildPhase=true
 declare -x IN_NIX_SHELL=impure
 source \$stdenv/setup
-export > $outer/shell-vars
+cp \$out $outer/shell-vars
 EOF
 
 env -i $SHELL --norc --noprofile -e -x "$outer/input-derivation"
