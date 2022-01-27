@@ -10,11 +10,12 @@ function mk_setenv() {
 cat <<EOF > $outer/input-derivation
 #!$SHELL
 source $shell_input_derivation
+unset buildPhase
 declare -x phases=nobuildPhase
 declare -x nobuildPhase=true
 declare -x IN_NIX_SHELL=impure
 source \$stdenv/setup
-cp \$out $outer/shell-vars
+export > $outer/shell-vars
 EOF
 
 env -i $SHELL --norc --noprofile -e -x "$outer/input-derivation"
@@ -23,6 +24,7 @@ env -i $SHELL --norc --noprofile -e -x "$outer/input-derivation"
 
 # Variables that should never be set
 for vname in \
+  phases buildPhase nobuildPhase out shell shellHook stdenv \
   HOME USER LOGNAME DISPLAY TERM \
   IN_NIX_SHELL NIX_BUILD_TOP NIX_BUILD_SHELL NIX_ENFORCE_PURITY \
   TZ PAGER SHELL SHLVL TMP TMPDIR TEMP TEMPDIR OLDPWD PWD SHELL
