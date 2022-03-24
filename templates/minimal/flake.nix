@@ -40,6 +40,7 @@
 
           # An example of user environment. Change your username.
           ({ pkgs, lib, ... }: {
+            users.users."yourUsername".home = "/Users/yourUsername";
             home-manager.users."yourUsername" = {
 
               home.packages = with pkgs; [ exa ];
