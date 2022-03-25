@@ -21,7 +21,7 @@
       m1 = import ./lib/m1.nix { inherit mkDarwinSystem flake-utils nixpkgs; };
       mkFunctor = f: nixpkgs.lib.setFunctionArgs f (nixpkgs.lib.functionArgs f);
 
-      templates = {
+      templates = rec {
         minimal = {
           description = "mkDarwinSystem minimal example";
           path = ./templates/minimal;
@@ -36,17 +36,18 @@
           description = "mkDarwinSystem with macos apps managed with niv";
           path = ./templates/niv-managed-apps;
         };
+
+        default = minimal;
       };
     in {
       inherit templates;
-      defaultTemplate = templates.minimal;
 
       mkDarwinSystem = (mkFunctor mkDarwinSystem) // {
         m1 = m1.apply;
         lib = import ./lib { inherit nixpkgs; };
       };
 
-      devShell.aarch64-darwin = let
+      devShells.aarch64-darwin.default = let
         pkgs = nixpkgs.legacyPackages.aarch64-darwin;
         intelPkgs = nixpkgs.legacyPackages.x86_64-darwin;
       in pkgs.mkShell { packages = [ pkgs.nixfmt intelPkgs.niv ]; };
