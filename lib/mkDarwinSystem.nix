@@ -51,8 +51,10 @@ nixpkgs.lib.fix (mkDarwinSystem:
     };
 
     outputs = {
-      inherit defaultApp defaultPackage devShell darwinConfiguration;
+      inherit defaultApp darwinConfiguration;
       inherit (darwinConfiguration) pkgs;
+      devShells.default = devShell;
+      packages.default = defaultPackage;
     };
 
   in outputs)
