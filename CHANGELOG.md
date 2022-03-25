@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+* Add Makefile ([12a7366](https://www.github.com/vic/mk-darwin-system/commit/12a7366))
+
+* Fix deprecations for default devShell and default package. ([992d35c](https://www.github.com/vic/mk-darwin-system/commit/992d35c)) ([83d20f4](https://www.github.com/vic/mk-darwin-system/commit/83d20f4))
+
+
+* Remove workaround for niv since it now builds on M1 ([1b197ac](https://www.github.com/vic/mk-darwin-system/commit/1b197ac))
+
 * Added an example to set your home directory #11 
 
 

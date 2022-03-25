@@ -10,5 +10,10 @@ If you add a new feature, or fix something, be sure that at least the templates 
 On the root of this repository execute:
 
 ```shell
-bash test/check-templates.bash
+make test
 ```
+
+### Pull-Requests
+
+Along with your awesome code contribution, please add a new line at the top of `Unreleased`
+section on CHANGELOG.md. Try keeping it short and provide links to your pull-request/issues.
