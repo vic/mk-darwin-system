@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* Added an example to set your home directory #11 
+
+
 ## [0.2.0](https://www.github.com/vic/mk-darwin-system/compare/v0.1.0...v0.2.0) (2021-12-07)
 
 
