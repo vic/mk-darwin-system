@@ -1,6 +1,6 @@
 .PHONY: test all
 
-test: check-templates nixfmt-check
+test: check-templates flake-check nixfmt-check
 
 all: nixfmt build
 
@@ -12,6 +12,9 @@ nixfmt-check:
 
 check-templates:
 	bash test/check-templates.bash
+
+flake-check:
+	nix flake check
 
 build:
 	nix build
