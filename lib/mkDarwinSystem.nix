@@ -40,7 +40,7 @@ nixpkgs.lib.fix (mkDarwinSystem:
       packages = darwinConfiguration.config.environment.systemPackages;
     };
 
-    defaultApp = flake-utils.lib.mkApp { 
+    defaultApp = flake-utils.lib.mkApp {
       drv = darwinConfiguration.pkgs.writeScriptBin "darwin-flake-switch" ''
         if [ -z "$*" ]; then
           exec ${darwinConfiguration.system}/sw/bin/darwin-rebuild --flake ${flakePath} switch
