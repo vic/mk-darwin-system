@@ -89,6 +89,14 @@ Loading the environment is as fast as sourcing a dump of environment variables.
 
 An example showing how to install `.dmg` Apps while managing them with `niv`.
 Links an home-manager installed Applications/ on user home.
+
+##### [niv-intel-overlay](templates/niv-intel-overlay)
+
+`nix flake init -t 'github:vic/mk-darwin-system#niv-intel-overlay'`
+
+An example of how to use `x86-64-darwin` packages even when your full
+system is `arm64-darwin`.
+
 ###### [vix - Vic's Nix Environment](http://github.com/vic/vix)
 
 vic's environment built using mkDarwinSystem.
