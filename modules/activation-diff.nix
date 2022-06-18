@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   system.activationScripts.diffClosures.text = ''
     if [ -e /run/current-system ]; then
       echo "new configuration diff" >&2

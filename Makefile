@@ -5,10 +5,10 @@ test: check-templates flake-check nixfmt-check
 all: nixfmt build
 
 nixfmt:
-	find . -type f -iname "*.nix" -print0 | xargs -0 nixfmt
+	nix run '.#fmt'
 
 nixfmt-check:
-	find . -type f -iname "*.nix" -print0 | xargs -0 nixfmt -c
+	nix run '.#fmt' -- --check
 
 check-templates:
 	bash test/check-templates.bash
