@@ -37,6 +37,11 @@
           path = ./templates/niv-managed-apps;
         };
 
+        intel-overlay = {
+          description = "mkDarwinSystem with some intel packages";
+          path = ./templates/intel-overlay;
+        };
+
         default = minimal;
       };
     in {
