@@ -90,9 +90,9 @@ Loading the environment is as fast as sourcing a dump of environment variables.
 An example showing how to install `.dmg` Apps while managing them with `niv`.
 Links an home-manager installed Applications/ on user home.
 
-##### [niv-intel-overlay](templates/niv-intel-overlay)
+##### [intel-overlay](templates/intel-overlay)
 
-`nix flake init -t 'github:vic/mk-darwin-system#niv-intel-overlay'`
+`nix flake init -t 'github:vic/mk-darwin-system#intel-overlay'`
 
 An example of how to use `x86-64-darwin` packages even when your full
 system is `arm64-darwin`.
