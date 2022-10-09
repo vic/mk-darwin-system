@@ -4,7 +4,8 @@
   hostModules,
   userName,
   userModules,
-  userHome ? "/Users/${userName}"
+  userHome ? "/Users/${userName}",
+  rootModules ? []
 }:
 let
   global = {
@@ -12,6 +13,7 @@ let
   };
 
   modules = [
+    { imports = rootModules; }
     (import ./modules/mk-host.nix { inherit hostName hostModules; })
     (import ./modules/mk-user.nix { inherit userName userHome userModules; })
     ./modules/activation-diff.nix
