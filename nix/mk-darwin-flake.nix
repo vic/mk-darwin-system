@@ -29,6 +29,7 @@ let
   in {
     packages.default = darwin.system;
     apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
+    checks.default = darwin.system;
   };
 
 in global // flake-utils.lib.eachSystem ["aarch64-darwin"] perSystem

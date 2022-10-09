@@ -10,12 +10,6 @@
       };
     };
 
-    examples.minimal = self.mkDarwinSystem inputs {
-      hostName = "your-hostname";
-      hostModules = [ ./../templates/minimal/nix/hostConfigurations/your-hostname.nix ];
-      userName = "your-username";
-      userModules = [ ./../templates/minimal/nix/homeConfigurations/your-username.nix ];
-    };
+    checks = import ./flake-checks.nix inputs;
 
-    checks.aarch64-darwin.minimal = self.examples.minimal.packages.aarch64-darwin.default;
 }
