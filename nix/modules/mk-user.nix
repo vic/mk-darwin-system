@@ -1,9 +1,9 @@
-{ userName, userHome }:
+{ userName, userHome, userModules }:
 { config, ...}@args:
 {
   users.users."${userName}".home = userHome;
   home-manager.users."${userName}" = {
-    imports = [ "${./../homeConfigurations}/${userName}.nix" ];
+    imports = userModules;
     config = {
      home.stateVersion = "22.05";
 
