@@ -1,15 +1,18 @@
-{ nixpkgs, flake-utils, nix-darwin, home-manager, ...}@inputs: flake:
+{ nixpkgs, flake-utils, nix-darwin, home-manager, ...}@mkdw-inputs:
 {
+  inputs ? mkdw-inputs,
+  flake,
   hostName,
-  hostModules,
+  hostModules ? [ "${flake}/nix/hostConfigurations/${hostName}.nix" ],
   userName,
-  userModules,
+  userModules ? [ "${flake}/nix/homeConfigurations/${userName}.nix" ],
   userHome ? "/Users/${userName}",
   rootModules ? []
 }:
 let
-  global = {
-    darwinConfigurations."${hostName}" = flake.self.packages.aarch64-darwin.default;
+  flakeInputs = inputs // {
+    inherit flake;
+    nivSources = import "${flake}/nix/sources.nix";
   };
 
   modules = [
@@ -23,15 +26,22 @@ let
     home-manager.darwinModules.home-manager
   ];
 
-  perSystem = system: let
-    darwin = nix-darwin.lib.darwinSystem {
-      inherit system modules;
-      inputs = inputs // flake;
-    };
-  in {
-    packages.default = darwin.system;
-    apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
-    checks.default = darwin.system;
+  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system:
+    let
+      darwin = nix-darwin.lib.darwinSystem {
+        inherit system modules; inputs = flakeInputs;
+      };
+    in {
+      packages.default = darwin.system;
+      apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
+      checks.default = darwin.system;
+      devShells.default = darwin.pkgs.mkShell {
+        buildInputs = with darwin.pkgs; [ nixVersions.stable niv alejandra ];
+      };
+    });
+
+  global = {
+    darwinConfigurations."${hostName}" = perSystem.aarch64-darwin.packages.default;
   };
 
-in global // flake-utils.lib.eachSystem ["aarch64-darwin"] perSystem
+in global // perSystem

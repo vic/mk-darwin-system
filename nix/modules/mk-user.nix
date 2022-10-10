@@ -1,9 +1,11 @@
 { userName, userHome, userModules }:
-{ config, ...}@args:
+{ config, inputs, ...}@args:
 {
   users.users."${userName}".home = userHome;
   home-manager.users."${userName}" = {
-    imports = userModules;
+    imports = [
+      { config._module.args = { system-config = config; inherit inputs; }; }
+    ] ++ userModules;
     config = {
      home.stateVersion = "22.05";
 

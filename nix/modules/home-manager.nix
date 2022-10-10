@@ -7,8 +7,7 @@
 
     sharedModules = [
       ./home-manager/init-shell-path.nix
-      # Allows access to system-config while evaluation user-level modules.
-      { config._module.args.system-config = config; }
+      ./home-manager/dmg-apps.nix
     ];
   };
 }

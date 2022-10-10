@@ -1,15 +1,15 @@
 {self, ...}@inputs: {
-    mkDarwinSystem = import ./mk-darwin-flake.nix inputs;
+  mkFlake = import ./mk-darwin-flake.nix inputs;
 
-    templates = rec {
-      default = minimal;
+  templates = rec {
+    default = minimal;
 
-      minimal = {
-        description = "mkDarwinSystem minimal example";
-        path = ./../templates/minimal;
-      };
+    minimal = {
+      description = "mkDarwinSystem minimal example";
+      path = ./../templates/minimal;
     };
+  };
 
-    checks = import ./flake-checks.nix inputs;
+  checks = import ./flake-checks.nix inputs;
 
 }
