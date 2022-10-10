@@ -13,6 +13,7 @@ git add .
 
 * Create files inside `nix/hostConfigurations` and `nix/homeConfigurations`.
 
-* See if everything is ok by running: `nix build`
+* See if everything is ok by running: `nix flake check`
 
-* Activate your system running: `nix run .`
+* Activate your system running: `nix run`
+
