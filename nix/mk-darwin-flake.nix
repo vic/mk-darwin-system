@@ -16,6 +16,7 @@ let
   };
 
   modules = [
+    { _module.args.flake = flake; }
     { imports = rootModules; }
     (import ./modules/mk-host.nix { inherit hostName hostModules; })
     (import ./modules/mk-user.nix { inherit userName userHome userModules; })
@@ -32,6 +33,7 @@ let
         inherit system modules; inputs = flakeInputs;
       };
     in {
+      packages.darwinConfigurations.${hostName} = darwin;
       packages.default = darwin.system;
       apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
       checks.default = darwin.system;
@@ -41,7 +43,6 @@ let
     });
 
   global = {
-    darwinConfigurations."${hostName}" = perSystem.aarch64-darwin.packages.default;
   };
 
 in global // perSystem

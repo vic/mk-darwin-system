@@ -1,7 +1,7 @@
-{ config, ...}:
+{ config, flake, ...}:
 
 {
   nixpkgs.overlays = [
-    (import ./../overlays/darwin-rebuild.nix config.system)
+    (import ./../overlays/darwin-rebuild.nix config.system flake)
   ];
 }
