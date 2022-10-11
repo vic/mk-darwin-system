@@ -33,9 +33,10 @@ let
     inputs = flakeInputs;
   };
 
-  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system: {
+  perSystem = flake-utils.lib.eachSystem [ "aarch64-darwin" ] (system: {
     packages.default = darwin.system;
     apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
+    apps.format = flake-utils.lib.mkApp { drv = darwin.pkgs.alejandra; };
     checks.default = darwin.system;
     devShells.default = darwin.pkgs.mkShell {
       buildInputs = with darwin.pkgs; [ nixVersions.stable niv alejandra ];
