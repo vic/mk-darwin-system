@@ -8,13 +8,14 @@
     mk-darwin-system.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = {mk-darwin-system, ...}@inputs:
-  let
+  outputs = {mk-darwin-system, ...} @ inputs: let
     userName = "your-username";
     hostName = "your-hostname";
 
     darwinFlake = mk-darwin-system.mkFlake {
-      inherit userName hostName inputs; flake = ./.;
+      inherit userName hostName inputs;
+      flake = ./.;
     };
-  in darwinFlake;
+  in
+    darwinFlake;
 }

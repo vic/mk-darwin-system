@@ -1,4 +1,9 @@
-{self, ...}@inputs: {
+{
+  self,
+  nixpkgs,
+  flake-utils,
+  ...
+} @ inputs: {
   mkFlake = import ./mk-darwin-flake.nix inputs;
 
   templates = rec {
@@ -12,4 +17,9 @@
 
   checks = import ./flake-checks.nix inputs;
 
+  apps.aarch64-darwin = let
+    pkgs = import nixpkgs {system = "aarch64-darwin";};
+  in {
+    format = flake-utils.lib.mkApp {drv = pkgs.alejandra;};
+  };
 }

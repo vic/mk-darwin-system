@@ -1,6 +1,13 @@
-{ hostName, hostModules }:
-{ config, lib, pkgs, flake, ... }:
 {
+  hostName,
+  hostModules,
+}: {
+  config,
+  lib,
+  pkgs,
+  flake,
+  ...
+}: {
   imports = hostModules;
 
   config = {

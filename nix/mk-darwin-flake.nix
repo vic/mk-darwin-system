@@ -1,25 +1,31 @@
-{ nixpkgs, flake-utils, nix-darwin, home-manager, ...}@mkdw-inputs:
 {
+  nixpkgs,
+  flake-utils,
+  nix-darwin,
+  home-manager,
+  ...
+} @ mkdw-inputs: {
   inputs ? mkdw-inputs,
   flake,
   hostName,
-  hostModules ? [ "${flake}/nix/hostConfigurations/${hostName}.nix" ],
+  hostModules ? ["${flake}/nix/hostConfigurations/${hostName}.nix"],
   userName,
-  userModules ? [ "${flake}/nix/homeConfigurations/${userName}.nix" ],
+  userModules ? ["${flake}/nix/homeConfigurations/${userName}.nix"],
   userHome ? "/Users/${userName}",
-  rootModules ? []
-}:
-let
-  flakeInputs = inputs // {
-    inherit flake;
-    nivSources = import "${flake}/nix/sources.nix";
-  };
+  rootModules ? [],
+}: let
+  flakeInputs =
+    inputs
+    // {
+      inherit flake;
+      nivSources = import "${flake}/nix/sources.nix";
+    };
 
   modules = [
-    { _module.args.flake = flake; }
-    { imports = rootModules; }
-    (import ./modules/mk-host.nix { inherit hostName hostModules; })
-    (import ./modules/mk-user.nix { inherit userName userHome userModules; })
+    {_module.args.flake = flake;}
+    {imports = rootModules;}
+    (import ./modules/mk-host.nix {inherit hostName hostModules;})
+    (import ./modules/mk-user.nix {inherit userName userHome userModules;})
     ./modules/activation-diff.nix
     ./modules/darwin-rebuild-overlay.nix
     ./modules/intel-overlay.nix
@@ -28,23 +34,23 @@ let
   ];
 
   darwin = nix-darwin.lib.darwinSystem {
-    inherit modules; 
+    inherit modules;
     system = "aarch64-darwin";
     inputs = flakeInputs;
   };
 
-  perSystem = flake-utils.lib.eachSystem [ "aarch64-darwin" ] (system: {
+  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system: {
     packages.default = darwin.system;
-    apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
-    apps.format = flake-utils.lib.mkApp { drv = darwin.pkgs.alejandra; };
+    apps.default = flake-utils.lib.mkApp {drv = darwin.pkgs.darwin-rebuild;};
+    apps.format = flake-utils.lib.mkApp {drv = darwin.pkgs.alejandra;};
     checks.default = darwin.system;
     devShells.default = darwin.pkgs.mkShell {
-      buildInputs = with darwin.pkgs; [ nixVersions.stable niv alejandra ];
+      buildInputs = with darwin.pkgs; [nixVersions.stable niv alejandra];
     };
   });
 
   global = {
     darwinConfigurations.${hostName} = darwin;
   };
-
-in global // perSystem
+in
+  global // perSystem
