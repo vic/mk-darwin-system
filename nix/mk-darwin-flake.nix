@@ -27,22 +27,23 @@ let
     home-manager.darwinModules.home-manager
   ];
 
-  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system:
-    let
-      darwin = nix-darwin.lib.darwinSystem {
-        inherit system modules; inputs = flakeInputs;
-      };
-    in {
-      packages.darwinConfigurations.${hostName} = darwin;
-      packages.default = darwin.system;
-      apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
-      checks.default = darwin.system;
-      devShells.default = darwin.pkgs.mkShell {
-        buildInputs = with darwin.pkgs; [ nixVersions.stable niv alejandra ];
-      };
-    });
+  darwin = nix-darwin.lib.darwinSystem {
+    inherit modules; 
+    system = "aarch64-darwin";
+    inputs = flakeInputs;
+  };
+
+  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system: {
+    packages.default = darwin.system;
+    apps.default = flake-utils.lib.mkApp { drv = darwin.pkgs.darwin-rebuild; };
+    checks.default = darwin.system;
+    devShells.default = darwin.pkgs.mkShell {
+      buildInputs = with darwin.pkgs; [ nixVersions.stable niv alejandra ];
+    };
+  });
 
   global = {
+    darwinConfigurations.${hostName} = darwin;
   };
 
 in global // perSystem
