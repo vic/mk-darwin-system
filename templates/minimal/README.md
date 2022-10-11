@@ -53,12 +53,12 @@ First, we need to determine the `.dmg` url from [keytty's releases](https://gith
 And then add a dependency using `niv`.
 
 ``` sh
-niv add keytty-dmg -t 'https://github.com/keytty/shelter/releases/download/<version>/Keytty.<version>.dmg' -v '1.2.8'
+niv add Keytty -t 'https://github.com/keytty/shelter/releases/download/<version>/Keytty.<version>.dmg' -v '1.2.8'
 ```
 
-After adding the `keytty-dmg` dependency at version `1.2.8`, we can install it
+After adding the `Keytty` dependency at version `1.2.8`, we can install it
 by editing `nix/homeConfigurations/your-username.nix`:
 
 ``` nix
-home.appsFromDmg = [ "keytty-dmg "] # NOTE: same name as niv-managed dependency.
+home.programs = [ pkgs.nivApps.Keytty ] # NOTE: same name as niv-managed dependency.
 ```

@@ -9,7 +9,6 @@
 
     sharedModules = [
       ./home-manager/init-shell-path.nix
-      ./home-manager/dmg-apps.nix
     ];
   };
 }

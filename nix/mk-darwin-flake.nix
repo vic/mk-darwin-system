@@ -18,7 +18,12 @@
     inputs
     // {
       inherit flake;
-      nivSources = import "${flake}/nix/sources.nix";
+      nivSources = let
+        f = "${flake}/nix/sources.nix";
+      in
+        if builtins.pathExists f
+        then import f
+        else {};
     };
 
   modules = [
@@ -30,6 +35,7 @@
     ./modules/darwin-rebuild-overlay.nix
     ./modules/intel-overlay.nix
     ./modules/home-manager.nix
+    ./modules/niv-managed-dmg-overlay.nix
     home-manager.darwinModules.home-manager
   ];
 
@@ -39,15 +45,16 @@
     inputs = flakeInputs;
   };
 
-  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system: {
-    packages.default = darwin.system;
-    apps.default = flake-utils.lib.mkApp {drv = darwin.pkgs.darwin-rebuild;};
-    apps.format = flake-utils.lib.mkApp {drv = darwin.pkgs.alejandra;};
-    checks.default = darwin.system;
-    devShells.default = darwin.pkgs.mkShell {
-      buildInputs = with darwin.pkgs; [nixVersions.stable niv alejandra];
-    };
-  });
+  perSystem = flake-utils.lib.eachSystem ["aarch64-darwin"] (system:
+    with darwin.pkgs; {
+      packages.default = darwin.system;
+      apps.default = flake-utils.lib.mkApp {drv = darwin-rebuild;};
+      apps.format = flake-utils.lib.mkApp {drv = alejandra;};
+      checks.default = darwin.system;
+      devShells.default = mkShell {
+        buildInputs = [nixVersions.stable niv alejandra];
+      };
+    });
 
   global = {
     darwinConfigurations.${hostName} = darwin;
