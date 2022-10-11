@@ -15,7 +15,8 @@
   rootModules ? [],
 }: let
   flakeInputs =
-    mkdw-inputs // inputs
+    mkdw-inputs
+    // inputs
     // {
       inherit flake;
       nivSources = let
