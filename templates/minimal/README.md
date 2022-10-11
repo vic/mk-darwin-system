@@ -1,3 +1,12 @@
+## Bootstrap.
+
+Edit `flake.nix` and change `hostName` and `userName`.
+
+On a fresh MacOS install you can run the following to bootstrap your system.
+``` sh
+env NIX_CONF_DIR=$PWD nix run
+```
+
 ## Test your system is buildable.
 
 ``` sh
