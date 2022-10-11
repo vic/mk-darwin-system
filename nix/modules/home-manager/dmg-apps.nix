@@ -40,7 +40,7 @@ in
     # Link apps installed by home-manager.
     home.activation = {
       aliasApplications = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        ln -sfn $genProfilePath/home-path/Applications/* "$HOME/Applications"
+        ln -sfn $genProfilePath/home-path/Applications/* $HOME/Applications/
       '';
     };
   };
