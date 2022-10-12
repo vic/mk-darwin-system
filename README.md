@@ -30,5 +30,7 @@ git add .
 
 * Files inside `nix/hostConfigurations` can set any [nix-darwin option](https://daiderd.com/nix-darwin/manual/index.html#sec-options).
 * Files inside `nix/homeConfigurations` can set any [home-manager option](https://nix-community.github.io/home-manager/options.html).
-* You can also create your own options and configuration modules. Checkout [NixOS Modules](https://nixos.wiki/wiki/NixOS_modules).
+* Using [nix-darwin brew options](https://daiderd.com/nix-darwin/manual/index.html#opt-homebrew.enable) it's possible to install 
+  packages from [Homebrew](https://brew.sh/) taps, casks, [Mac App Store Apps](https://www.apple.com/app-store/) and Docker containers. Note that these would be installed as system packages.
+* When your nix files get bigger you can split them using conventional [NixOS Modules](https://nixos.wiki/wiki/NixOS_modules) `imports = []`.
 * Be sure to also check this nice [Nix language tutorial](https://nix.dev/tutorials/nix-language)
