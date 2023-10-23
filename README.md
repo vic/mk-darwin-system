@@ -1,3 +1,16 @@
+## Deprecation Notice
+
+NOTE: This repo is now read-only, since I (vic) am no longer using MacOS since early 2023. You can still find a much more maintained and better alternative at 
+https://github.com/srid/nixos-flake
+
+
+<details>
+  <summary>Old README</summary>
+  
+
+
+
+
 ## Usage
 
 * Create your system flake:
@@ -34,3 +47,7 @@ git add .
   packages from [Homebrew](https://brew.sh/) taps, casks, [Mac App Store Apps](https://www.apple.com/app-store/) and Docker containers. Note that these would be installed as system packages.
 * When your nix files get bigger you can split them using conventional [NixOS Modules](https://nixos.wiki/wiki/NixOS_modules) `imports = []`.
 * Be sure to also check this nice [Nix language tutorial](https://nix.dev/tutorials/nix-language)
+
+
+
+</details>
